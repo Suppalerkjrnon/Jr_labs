@@ -27,10 +27,6 @@ import requests
 
 geolocator = Nominatim(user_agent="Offline Toxic report", timeout= 30)
 
-# import streamlit_authenticator as stauth
-# import yaml 
-# from yaml.loader import SafeLoader
-
 ###### page config ######
 
 st.set_page_config(
@@ -127,7 +123,7 @@ location_methods_lang = {
 
 }
 
-# Incident Type IDs : [Thai 0, Malay 1, English 2]
+# Toxic Type IDs : [Thai 0, Malay 1, English 2]
 toxic_types = {
     1: ['การล่วงละเมิดด้านคำพูด','Penyalahgunaan' ,'Verbal Abuse'],
     2: ['การทำให้ความเดือดร้อน', 'Mengganggu','Griefing'],
@@ -316,14 +312,13 @@ st.divider()
 # Define a dictionary to map selected language to description fields
 language_description_mapping = {
     "English": user_desc_input,
-    "Thai": user_desc_input,
-    "Malay": user_desc_input
+    "ภาษาไทย": user_desc_input,
+    "Bahasa Melayu": user_desc_input
 }
 
 description_value = language_description_mapping.get(st.session_state.selected_language, "")
 
 st.write(description_value)
-
 
 ### Submit Button ###
 
@@ -342,8 +337,8 @@ if st.button(info['submit_button_label']):
         "Date": user_selected_date,
         "Time": user_selected_time,
         "Description_en": description_value if st.session_state.selected_language == "English" else "",
-        "Description_th": description_value if st.session_state.selected_language == "Thai" else "",
-        "Description_malay": description_value if st.session_state.selected_language == "Malay" else "",
+        "Description_th": description_value if st.session_state.selected_language == "ภาษาไทย" else "",
+        "Description_malay": description_value if st.session_state.selected_language == "Bahasa Melayu" else "",
         "Files": upload_file_name_logic,
         "Photos": upload_photo_name_logic,
         "Videos": upload_video_name_logic
@@ -387,72 +382,6 @@ if st.button(info['submit_button_label']):
 
 ################################################################################
 
-################################################################################
-        
-    # def translate(text, target_lang):
-    #     # Define translation messages based on language pairs
-    #     translation_messages = {
-    #         ("English", "Malay"): "Kindly translate the following text from english to malay. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element",
-    #         ("English", "Thai"): "Kindly translate the following text from english to thai. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element",
-    #         ("Malay", "English"): "Kindly translate the following text from malay to english. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element",
-    #         ("Malay", "Thai"): "Kindly translate the following text from malay to thai. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element", 
-    #         ("Thai", "English"): "Kindly translate the following text from thai to english. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element",
-    #         ("Thai", "Malay"): "Kindly translate the following text from thai to malay. DO NOT NARRORATE, ONLY PROVIDE THE TRANSLATED TEXT, Please keep html and markdown element"
-    #     }
-        
-    #     # Get the source language from the selected language
-    #     source_lang = st.session_state.selected_language
-        
-    #     # Get the translation message based on the source and target languages
-    #     translation_message = translation_messages.get((source_lang, target_lang), "")
-    
-    #     # Perform the translation
-    #     translated_text = ""
-    #     if translation_message:
-
-    #         # Split the text into chunks of maximum length
-    #         max_chunk_length = 1000  # Adjust as needed
-    #         text_chunks = [text[i:i+max_chunk_length] for i in range(0, len(text), max_chunk_length)]
-            
-    #         # Translate each chunk individually
-    #         translated_chunks = []
-    #         for chunk in text_chunks:
-    #             response = client.chat.completions.create(
-    #                 model="gpt-4-turbo-preview",
-    #                 messages=[
-    #                     {"role": "system", "content": translation_message},
-    #                     {"role": "user", "content": f"{chunk}"}
-    #                 ]
-    #             )
-    #             translated_chunks.append(response.choices[0].message.content)
-        
-    #         # Concatenate the translated chunks
-    #         translated_text = " ".join(translated_chunks)
-    
-    #     return translated_text
-    
-    # # Perform the translation
-
-    # translated_text_en = translate(description_value, "English")
-    # translated_text_malay = translate(description_value, "Malay")
-    # translated_text_thai = translate(description_value, "Thai")
-
-    # # Save the translated text to the database according to the columns, only save if the columns are empty
-    # conn = sqlite3.connect(db_paths)
-
-    # if not user_input_df["Description_en"].all():
-    #     user_input_df["Description_en"] = translated_text_en
-    #     user_input_df.to_sql('ceasefire', conn, if_exists='replace', index=False)
-
-    # if not user_input_df["Description_malay"].all():
-    #     user_input_df["Description_malay"] = translated_text_malay
-    #     user_input_df.to_sql('ceasefire', conn, if_exists='replace', index=False)
-
-    # if not user_input_df["Description_th"].all():
-    #     user_input_df["Description_th"] = translated_text_thai
-    #     user_input_df.to_sql('ceasefire', conn, if_exists='replace', index=False)
-
-    # conn.close()
 
 
 
