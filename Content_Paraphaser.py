@@ -1,12 +1,24 @@
 import streamlit as st
 from streamlit_quill import st_quill 
+from streamlit_extras.stylable_container import stylable_container 
 import pandas as pd
 import anthropic
 from dotenv import load_dotenv
 import os
+import re
+
+#### CSS Customization ####
+
+def local_css(file_name):
+    with open(file_name) as f:
+        st.markdown(f'<style>{f.read()}</style>', unsafe_allow_html=True)
+        
+local_css("style.css")
+
+#### Session State ####
 
 if 'user_input' not in st.session_state:
-    st.session_state.user_input = ''
+    st.session_state.user_input = None
     
 #### Claude API setup ####
 load_dotenv()
@@ -16,20 +28,22 @@ client = anthropic.Anthropic(
 
 ##### Title of the app #####
 st.title ('Thai Content Paraphraser')
-st.divider()
 
 ##### Front End #####
-user_input = st_quill(placeholder="Enter your content here...", html=True, readonly=False, key='user_input')
-paraphase_button = st.button('Paraphrase')
-
+user_input = st_quill(placeholder="Enter your content here...", html=True, readonly=False, key='quill_input')
+st.session_state.user_input = user_input
 
 #### Button ####
+paraphase_button = st.button('Paraphrase')
 if paraphase_button:
     message = client.messages.create(
         model="claude-3-opus-20240229",
         max_tokens=4000,
         temperature=0,
-        system="\nYour role as a Thai Content Paraphraser involves the meticulous task of rephrasing Thai content to enhance its comprehensiveness, ensuring that the meaning, context, and keywords are enriched and effectively conveyed. Your expertise lies in skillfully crafting paraphrased versions that not only capture the essence of the original content but also broaden its scope, depth, and relevance. Through your adeptness in language and comprehension, you strive to elevate the quality and accessibility of the information presented, catering to a diverse audience and optimizing its impact across various platforms and mediums, AND YOU MUST RESPONSE IN THAI",
+        system="""
+        As a Thai Content Paraphraser, your main responsibility is to carefully reword Thai content to improve its depth and clarity.
+        You ensure that the essence, context, and key points are retained and effectively communicated. Your skill lies in creating paraphrased versions that not only maintain the core message of the original content but also expand its significance and applicability 
+        but, do not expand the character further than the original content only to creating paraphrased versions , AND YOU MUST RESPONSE IN THAI""",
         messages=[
         {"role": "user", "content": user_input}
         ]
@@ -37,5 +51,41 @@ if paraphase_button:
     
     raw_text = message.content
     text_cleaned = raw_text[0].text
-    st.write(text_cleaned)
     
+    #Remove markdown and html tags from the text using regex
+    text_cleaned = re.sub(r'<[^>]*>', '', text_cleaned)
+    text_cleaned = re.sub(r'\*\*', '', text_cleaned)
+    
+    #Display the paraphrased content in the text area
+    st.subheader('Paraphrased Content')
+    with stylable_container(
+        key = 'paraphrased_content',
+        css_styles= """
+        {   border: 1px solid rgba(49, 51, 63, 0.2);
+            border-radius: 25px;
+            padding: 15px;
+            width: auto;
+            word-wrap: break-word;
+            }
+        """,
+    ):
+        st.markdown(text_cleaned)
+
+    #Count the number of words in the text_cleaned
+    c1, c2, c3, c4 = st.columns(4)
+    
+    with c1:
+        character_count = len(text_cleaned.replace(" ", ""))
+        st.metric(label='No. Characters', value=character_count)
+        
+    with c2:
+        word_count = len(text_cleaned.split())
+        st.metric(label='No. Words', value=word_count)
+        
+    with c3:
+        original_word_count = len(user_input.split())
+        st.metric(label='Original No. Words', value=original_word_count)
+    
+    with c4:
+        original_character_count = len(user_input.replace(" ", ""))
+        st.metric(label='Original No. Characters', value=original_character_count)
