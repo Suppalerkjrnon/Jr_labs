@@ -1,0 +1,45 @@
+[data-testid="stAppViewContainer"] { /* Background */
+    display: flex;
+    background-color: #222831;
+}
+
+[data-testid="column"] {
+    box-shadow: #EEEEEE 0px 2px 1px -1px, #EEEEEE 0px 1px 1px 0px, #EEEEEE 0px 1px 3px 0px;
+    border-radius: 10px;  /*How Rounded of border */
+    padding: 2% 2% 2%;          /* Metric Colum */
+    width: 20%;
+} 
+
+[data-testid="stMetricValue"] {
+    color: #76ABAE;
+    font-size: dynamic;
+}
+
+p {
+    font-size: 15px;
+    font-family: sans-serif;
+    color: #EEEEEE;
+    text-align: center;
+}
+
+.paraphrase_button button {
+    background-color: #EEEEEE !important;
+    color: #000000 !important;
+}
+
+h1 {
+    font-size: 30px;
+    font-family: sans-serif;
+    color: #76ABAE;
+    text-align: justify;
+}
+
+h3 {
+    font-size: 20px;
+    font-family: sans-serif;
+    color: #76ABAE;
+    text-align: justify;
+}
+
+
+
