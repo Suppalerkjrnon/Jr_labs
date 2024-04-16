@@ -1,3 +1,3 @@
-Hello, this is my share space for keeping my work which is not classify. 
+Hi there, this is my shared workspace where I store unclassified work.
 
 Feel free to ask :)
