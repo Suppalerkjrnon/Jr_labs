@@ -34,7 +34,21 @@ user_input = st_quill(placeholder="Enter your content here...", html=True, reado
 st.session_state.user_input = user_input
 
 #### Button ####
-paraphase_button = st.button('Paraphrase')
+with stylable_container( 
+    "paraphrase_button",
+    css_styles= """
+    [data-testid="baseButton-secondary"] {
+        background-color: #EEEEEE;
+        color: #000000; /* Sets the text color to black */
+    }
+
+    [data-testid="baseButton-secondary"] p {
+        color: inherit; /* Inherits color from parent (button) */
+    }
+    """,
+):
+    paraphase_button = st.button("Paraphrase", key="paraphrase_button")
+# paraphase_button = st.button('Paraphrase')
 if paraphase_button:
     message = client.messages.create(
         model="claude-3-opus-20240229",
@@ -61,11 +75,12 @@ if paraphase_button:
     with stylable_container(
         key = 'paraphrased_content',
         css_styles= """
-        {   border: 1px solid rgba(49, 51, 63, 0.2);
-            border-radius: 25px;
+        {   border: 1px solid #EEEEEE;
+            border-radius: 10px;
             padding: 15px;
             width: auto;
-            word-wrap: break-word;
+            overflow: auto;
+            text-color: #EEEEEE;
             }
         """,
     ):
