@@ -26,6 +26,16 @@ client = anthropic.Anthropic(
     api_key = os.getenv('claude_api_key')
 )
 
+tone_prompts = {
+    'Business': "As a Thai Content Paraphraser, your primary duty is to meticulously rephrase Thai content to enhance its depth and clarity. You ensure that the essence, context, and key points remain intact and are effectively conveyed. Your expertise lies in crafting paraphrased versions that maintain the core message of the original content while expanding its significance and relevance. DO NOT expand the character further than the original content only to creating paraphrased versions",
+    
+    'Neutral': "As a Thai Content Paraphraser, your main responsibility is to carefully reword Thai content to improve its depth and clarity. You ensure that the essence, context, and key points are retained and effectively communicated. Your skill lies in creating paraphrased versions that not only maintain the core message of the original content but also expand its significance and applicability but, do not expand the character further than the original content only to creating paraphrased versions , AND YOU MUST RESPONSE IN THAI",
+
+    'Academic': "As a a Thai content paraphraser, your main duty is to carefully reword Thai text such that its clarity and depth are improved. It critical to successfully communicate the essential ideas, context, and points without losing any of them. You are an expert at creating condensed versions that capture the essence of the original material while expanding its relevance and application while staying within the original character count. This academic project necessitates a sophisticated comprehension of linguistic subtleties and contextual significance in order to preserve the original content integrity and increase its scholarly effect.  DO NOT expand the character further than the original content only to creating paraphrased versions"
+    
+}
+
+
 ##### Title of the app #####
 st.title ('Thai Content Paraphraser')
 
@@ -33,7 +43,7 @@ st.title ('Thai Content Paraphraser')
 user_input = st_quill(placeholder="Enter your content here...", html=True, readonly=False, key='quill_input')
 st.session_state.user_input = user_input
 
-#### Button ####
+#### Paraphrase_button ####
 with stylable_container( 
     "paraphrase_button",
     css_styles= """
@@ -47,17 +57,16 @@ with stylable_container(
     }
     """,
 ):
+    tone_select = st.selectbox('Select Tones', tone_prompts.keys(), key='tone_select')
     paraphase_button = st.button("Paraphrase", key="paraphrase_button")
+    # Create a select box for tone selection
 # paraphase_button = st.button('Paraphrase')
 if paraphase_button:
     message = client.messages.create(
-        model="claude-3-opus-20240229",
+        model="claude-3-sonnet-20240229",
         max_tokens=4000,
         temperature=0,
-        system="""
-        As a Thai Content Paraphraser, your main responsibility is to carefully reword Thai content to improve its depth and clarity.
-        You ensure that the essence, context, and key points are retained and effectively communicated. Your skill lies in creating paraphrased versions that not only maintain the core message of the original content but also expand its significance and applicability 
-        but, do not expand the character further than the original content only to creating paraphrased versions , AND YOU MUST RESPONSE IN THAI""",
+        system= tone_prompts[tone_select],
         messages=[
         {"role": "user", "content": user_input}
         ]
