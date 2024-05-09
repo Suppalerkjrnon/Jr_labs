@@ -1,5 +1,7 @@
-Hi there, this is my shared workspace where I store unclassified work.
+Hello there! this is my repository that keeps all of my personal work and interest which keep some of my recent work code as a tool or just plain function.
 
-<important> Some of the data are just mockup </important>
+Feel free to ask if you are interested in something here!
 
-Feel free to ask :)
+Suppalerk Petchpol
+
+Junior 
