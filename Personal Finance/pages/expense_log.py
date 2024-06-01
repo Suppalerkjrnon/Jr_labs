@@ -9,7 +9,7 @@ class Expense_Log:
             # Establish connection to Google Sheets
             self.conn = st.connection('gsheets', type=GSheetsConnection)
             # Read data from Google Sheets
-            self.existing_data = self.conn.read(spreadsheet= 'https://docs.google.com/spreadsheets/d/1D3sD13BEx8B7HEr-wSsZPlqB_9YIH0LFDbOmMoaoLhY/edit?usp=sharing')
+            self.existing_data = self.conn.read(spreadsheet= 'Your Google Sheet URL')
             # Convert data to DataFrame
             self.df = pd.DataFrame(self.existing_data)
             # last_row = pd.DataFrame({'cost': self.df['cost'].sum()}, index=['Total'])
