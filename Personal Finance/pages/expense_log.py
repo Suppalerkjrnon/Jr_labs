@@ -1,8 +1,16 @@
+# General Libraries #
 import pandas as pd 
+from datetime import datetime
+
+# Streamlit Libraries #
 import streamlit as st
 from streamlit_gsheets import GSheetsConnection
+from streamlit_extras.metric_cards import style_metric_cards
+
+# Visualization Libraries #
 import plotly.express as px
 import plotly.graph_objects as go
+
 
 #################### Session State ####################
 
@@ -29,7 +37,7 @@ class Expense_Log:
             st.session_state.gsheets = True
             
             # Read data from Google Sheets
-            self.existing_data = self.conn.read(spreadsheet= 'REPLACE_WITH_YOUR_GOOGLE_SHEET_LINK')
+            self.existing_data = self.conn.read(spreadsheet= 'Replace with your Google Sheets URL')
             st.session_state.existing_data = self.existing_data
             
             #Convert Existing Data to DataFrame
@@ -82,27 +90,41 @@ def main():
                 # Summary the total cost
                 #Format the cost column to 2 decimal places
                 filtered_expense_log_df['cost'] = filtered_expense_log_df['cost'].apply(lambda x: round(x, 2))
-                st.success(f"Total Expense: {filtered_expense_log_df['cost'].sum()} Bath")
                 #Comparison total sum of cost between filtered_expense_log_df and filtered_previous_expense_log_df
                 if filtered_previous_expense_log_df.empty:
                     st.warning("No data available for comparison.")
 
                 else:
-                    previous_total = filtered_previous_expense_log_df['cost'].sum()
                     current_total = filtered_expense_log_df['cost'].sum()
-                    #Format the total cost to 2 decimal places and delete comma
-                    formatted_current_total = int(abs(current_total))             
-                    formatted_previous_total = int(abs(previous_total))
+                    previous_total = filtered_previous_expense_log_df['cost'].sum()
                     
+                    #Format the total cost to 2 decimal places and delete comma
+                    formatted_current_total = int(abs(current_total))
+                    formatted_previous_total = int(abs(previous_total))
+
+                #Visualization Column Header
+                st.write("# Visualization")
+                st.divider()
+                #Metric value column
+                
+                metric_col = st.columns(2)
+                
+                with metric_col[0]:
+                    st.metric(label="Total Expense", value=formatted_current_total, delta=formatted_previous_total - formatted_current_total)
+                    
+                    style_metric_cards(border_left_color="#672E6D")
+                    
+                    st.success(f"Total Expense: {filtered_expense_log_df['cost'].sum()} Bath")
+                    
+                    #Logic statement to compare the total cost between current and previous month
                     if previous_total > current_total:
                         st.success(f"Total Expense Decreased by {formatted_previous_total - formatted_current_total} Bath")
                     elif previous_total < current_total:
                         st.error(f"Total Expense Increased by {formatted_previous_total - formatted_current_total} Bath")
                     else:
-                        st.success("Total Expense Remained the Same")
-
-                #Visualization Columns
-                st.write("# Visualization")
+                        st.success("Total Expense Remained the Same")  
+                
+                #Visualization column
                 visualzation_col = st.columns(2)
                 
                 with visualzation_col[0]:
@@ -113,6 +135,15 @@ def main():
                 with visualzation_col[1]:
                     bar_source_current = filtered_expense_log_df[filtered_expense_log_df['cost'].notnull()].groupby(['month'])['cost'].sum().reset_index()
                     bar_source_previous = filtered_previous_expense_log_df[filtered_previous_expense_log_df['cost'].notnull()].groupby(['month'])['cost'].sum().reset_index()
+                    delta_cost = abs(bar_source_current['cost'].iloc[-1] - bar_source_previous['cost'].iloc[-1])
+                    formatted_delta_cost = int(delta_cost)
+                    
+                    # Coordinate of the line to connect the cost between current and previous month
+                    x_coords = [bar_source_current['month'].iloc[-1], bar_source_previous['month'].iloc[-1]]
+                    y_coords = [bar_source_current['cost'].iloc[-1], bar_source_previous['cost'].iloc[-1]]
+                    mid_x = (x_coords[0] + x_coords[1]) / 2
+                    mid_y = (y_coords[0] + y_coords[1]) / 2
+
                     
                     fig_bar = go.Figure()
                     # Add current costs bar trace
@@ -132,31 +163,30 @@ def main():
                         marker_color='red'
                     ))
                     
-                    #Add line trace for visual value of the cost connect with another month
-                    fig_bar.add_trace(go.Scatter(
-                        x=bar_source_current['month'],
-                        y=bar_source_current['cost'],
-                        mode='lines+markers',
-                        name='Current Cost',
-                        line=dict(color='blue', width=2)
-                    ))
                     
+                    #Add line to connect the cost between current and previous month, and add the text to show the difference cost between the month
                     fig_bar.add_trace(go.Scatter(
-                        x=bar_source_previous['month'],
-                        y=bar_source_previous['cost'],
-                        mode='lines+markers',
-                        name='Previous Cost',
-                        line=dict(color='red', width=2)
-                    ))
-                    
-                    #Add line to connect the cost between current and previous month
-                    fig_bar.add_trace(go.Scatter(
-                        x=[bar_source_current['month'].iloc[-1], bar_source_previous['month'].iloc[-1]],
-                        y=[bar_source_current['cost'].iloc[-1], bar_source_previous['cost'].iloc[-1]],
+                        x= [x_coords[0], mid_x, x_coords[1]],
+                        y= [y_coords[0], mid_y, y_coords[1]],
                         mode='lines',
                         name='Connection',
+                        textposition='top center',
                         line=dict(color='green', width=2, dash='dash')
                     ))
+                    
+                    # Add annotation for the delta cost at the midpoint of the line
+                    fig_bar.add_annotation(
+                        x=mid_x,
+                        y=mid_y,
+                        text=formatted_delta_cost,
+                        showarrow=False,
+                        arrowhead=4,
+                        ax=20,
+                        ay=-80,
+                        font=dict(
+                            size = 16,
+                            color = 'red'
+                        ))
                     
                     # Update the layout
                     fig_bar.update_layout(
@@ -164,7 +194,6 @@ def main():
                         xaxis_title='Month',
                         yaxis_title='Cost',
                         barmode='group',
-                        #filtered legend only show current and previous cost
                         showlegend=True,
                         legend=dict(
                             bgcolor='rgba(255, 255, 255, 0)',
