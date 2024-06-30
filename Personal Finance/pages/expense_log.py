@@ -10,7 +10,7 @@ from streamlit_extras.metric_cards import style_metric_cards
 # Visualization Libraries #
 import plotly.express as px
 import plotly.graph_objects as go
-
+import matplotlib.pyplot as plt
 
 #################### Session State ####################
 
@@ -37,7 +37,7 @@ class Expense_Log:
             st.session_state.gsheets = True
             
             # Read data from Google Sheets
-            self.existing_data = self.conn.read(spreadsheet= 'Replace with your Google Sheets URL')
+            self.existing_data = self.conn.read(spreadsheet= 'Replace with your Google Sheet shared link url')
             st.session_state.existing_data = self.existing_data
             
             #Convert Existing Data to DataFrame
@@ -206,6 +206,21 @@ def main():
                     # Plot the chart using Streamlit
                     st.plotly_chart(fig_bar)
                     
+                    #Visualization Column2
+                    
+                visualzation_col2 = st.columns(2)
+                
+                with visualzation_col2[0]:
+                    fig_line = px.line(filtered_expense_log_df, x='date', y='cost', title='Expense Frequency by Date')
+                    fig_line.update_layout(
+                        xaxis_title='Date',
+                        yaxis_title='Cost',
+                        width=1000,
+                        height=500
+                    )
+                    
+                    st.plotly_chart(fig_line)
+
         else:
             st.error("Failed to load data.")
 
